@@ -17,14 +17,7 @@ const cors = require('cors');
 const xss = require('xss-clean');
 const rateLimit = require('express-rate-limit');
 
-
-// Swagger
-// const swaggerUI = require('swagger-ui-express');
-// const YAML = require('yamljs');
-// const swaggerDOC = YAML.load('./swagger.yaml');
-
 // routes
-// app.use('/', swaggerUI.serve, swaggerUI.setup(swaggerDOC));
 app.use('/api/v1/authu', authRouter);
 app.use('/api/v1/suggestions', authenticateUser, suggestionsRouter);
 

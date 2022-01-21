@@ -81,25 +81,6 @@ const UserSchema = mongoose.Schema({
         j: true,
         wtimeout: 1000
     },
-})
-
-
-UserSchema.methods.getToken = function () {
-    return jwt.sign({
-        UserId: this._id,
-        UserName: this.userName,
-        UserFullName: this.fullName,
-        UserPhone: this.phoneNumber,
-        UserPicture: this.profilePic,
-        UserEmail: this.emailAddress,
-    }, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_LIFE
-    });
-}
-
-UserSchema.methods.comparePwd = async function (pwd) {
-    const correct = await bcrypt.compare(pwd, this.password);
-    return correct;
-}
+});
 
 module.exports = mongoose.model('User', UserSchema);
