@@ -4,12 +4,8 @@ const express = require('express');
 const app = express();
 const connectDB = require('./db/connect');
 const authRouter = require('./routes/auth');
-const {
-  getAllBooks,
-  getSingleBook,
-} = require('./controllers/books');
-const booksRouter = require('./routes/books');
-const authenticateAdmin = require('./middleware/authentication');
+const suggestionsRouter = require('./routes/suggestions');
+const authenticateUser = require('./middleware/authentication');
 // error handler
 const notFoundMiddleware = require('./middleware/not-found');
 const errorHandlerMiddleware = require('./middleware/error-handler');
@@ -23,16 +19,14 @@ const rateLimit = require('express-rate-limit');
 
 
 // Swagger
-const swaggerUI = require('swagger-ui-express');
-const YAML = require('yamljs');
-const swaggerDOC = YAML.load('./swagger.yaml');
+// const swaggerUI = require('swagger-ui-express');
+// const YAML = require('yamljs');
+// const swaggerDOC = YAML.load('./swagger.yaml');
 
 // routes
-app.use('/', swaggerUI.serve, swaggerUI.setup(swaggerDOC));
-app.use('/api/v1/authb', authRouter);
-app.use('/api/v1/books', authenticateAdmin, booksRouter);
-app.route('/api/v1/book/:id').get(getSingleBook);
-app.route('/api/v1/book').get(getAllBooks);
+// app.use('/', swaggerUI.serve, swaggerUI.setup(swaggerDOC));
+app.use('/api/v1/authu', authRouter);
+app.use('/api/v1/suggestions', authenticateUser, suggestionsRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);

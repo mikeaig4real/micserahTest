@@ -1,41 +1,51 @@
-const Admin = require('../models/Admin');
+const User = require('../models/User');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 const { StatusCodes } = require('http-status-codes');
 const { BadRequestError,UnauthenticatedError } = require('../errors');
 
-const registerAdmin = async (req, res) => {
-    const oldAdmin = await Admin.findOne({ username: req.body.username });
-    if (!oldAdmin) {
-        const admin = await Admin.create({
-            ...req.body
-        });
-        const token = admin.getToken();
-        return res.status(StatusCodes.CREATED).json({
-            username: admin.username,
-            token
-        });
-    };
-    throw new BadRequestError(`Sorry ${oldUser.username} has been taken try new one please...`)
-}
-
-const loginAdmin = async (req, res) => {
-    const { username, password } = req.body;
-    if (!username || !password) {
+const loginUser = async (req, res) => {
+    const { user, password } = req.body;
+    if (!user || !password) {
         throw new BadRequestError('Please provide complete login credentials');
     }
-    const admin = await Admin.findOne({ username });
-    if (!admin) {
+    let userName, emailAddress, phoneNumber
+    let emailRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    let phoneNoRegex = /^[0-9]{6,14}$/
+    if (emailRegex.test(user)) {
+        emailAddress = user;
+    } else if (phoneNoRegex.test(user)) {
+        phoneNumber = user;
+    } else {
+        userName = user;
+    }
+    const userDb = await User.findOne({ $or: [{ userName }, { emailAddress }, { phoneNumber }] });
+    if (!userDb) {
         throw new UnauthenticatedError('Invalid credentials');
     }
-    const isCorrect = await admin.comparePwd(password);
+    const isCorrect = await bcrypt.compare(password, userDb.password);
     if (!isCorrect) {
         throw new UnauthenticatedError('password is incorrect,try again...');
     }
-    const token = admin.getToken();
-    return res.status(StatusCodes.OK).json({ username: admin.username, token });
+    const shortProfile = {
+        UserId: userDb._id,
+        UserIdF:userDb.userID,
+        UserName: userDb.userName,
+        UserFullName: userDb.fullName,
+        UserPhone: userDb.phoneNumber,
+        UserPicture: userDb.profilePic,
+        UserEmail: userDb.emailAddress,
+    }
+    const token = jwt.sign({
+        ...shortProfile
+    }, process.env.JWT_SECRET, {
+        expiresIn: process.env.JWT_LIFE
+    });
+    return res.status(StatusCodes.OK).json({ shortProfile, token });
 }
 
 
 module.exports = {
-    registerAdmin,
-    loginAdmin,
+    loginUser,
 }

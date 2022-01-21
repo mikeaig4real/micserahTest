@@ -1,5 +1,6 @@
-const Admin = require('../models/Admin');
+const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 const { UnauthenticatedError } = require('../errors');
 
 const auth = async (req, res, next) => {
@@ -10,12 +11,25 @@ const auth = async (req, res, next) => {
 
     const token = header.split(' ')[1];
     try {
-        const adminInfo = await jwt.verify(token, process.env.JWT_SECRET);
+        const userInfo = jwt.verify(token, process.env.JWT_SECRET);
         const {
-            adminId,
-            adminName
-        } = adminInfo;
-        req.admin = { adminId, adminName };
+            UserId,
+            UserIdF,
+            UserName,
+            UserFullName,
+            UserPhone,
+            UserPicture,
+            UserEmail,
+        } = userInfo;
+        req.user = {
+            UserId,
+            UserIdF,
+            UserName,
+            UserFullName,
+            UserPhone,
+            UserPicture,
+            UserEmail
+        };
         next();
     } catch (error) {
         throw new UnauthenticatedError('invalid token');
