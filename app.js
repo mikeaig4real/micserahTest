@@ -21,6 +21,10 @@ const rateLimit = require('express-rate-limit');
 app.use('/api/v1/authu', authRouter);
 app.use('/api/v1/suggestions', authenticateUser, suggestionsRouter);
 
+app.get('/', (req, res) => {
+  res.send('</h1>Hello User<h1>');
+})
+
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
 
